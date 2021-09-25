@@ -1,16 +1,18 @@
 import React, { Component } from "react";
-import { data } from "./mock.js";
+import { data } from "./mock";
 export default class App extends Component {
-  state = {
-    data: data,
-    name: "",
-    newName: "",
-    status: "",
-    newStatus: "",
-    selected: null,
-    newData: data,
-    prop: "",
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: data,
+      name: "",
+      status: "",
+      selected: null,
+      restore: data,
+      newName: "",
+      newStatus: "",
+    };
+  }
   render() {
     const onChange = (e) => {
       this.setState({
@@ -24,7 +26,7 @@ export default class App extends Component {
         selected: e.id,
       });
     };
-    const onSave = (e) => {
+    const onSave = () => {
       let newData = this.state.data.map((value) =>
         value.id === this.state.selected
           ? { ...value, name: this.state.name, status: this.state.status }
@@ -36,129 +38,138 @@ export default class App extends Component {
       });
     };
     const onDelete = (e) => {
-      let map = this.state.data.filter((item) => item.id !== e.id);
+      let map = this.state.data.filter((value) => value.id !== e.id);
       this.setState({
         data: map,
       });
     };
+    const onRestore = () => {
+      this.setState({
+        data: this.state.restore,
+      });
+    };
     const onAdd = () => {
-      if (
-        this.state.newName.length !== 0 &&
-        this.state.newStatus.length !== 0
-      ) {
-        let newUser = {
-          id: this.state.data[this.state.data.length - 1].id + 1,
-          name: this.state.newName,
-          status: this.state.newStatus,
-        };
-        var Pushdata = this.state.data;
-        Pushdata.push(newUser);
+      let newBaze = {
+        id: this.state.data[this.state.data.length - 1].id + 1,
+        name: this.state.newName,
+        status: this.state.newStatus,
+      };
+      let data2 = this.state.data;
+      data2.push(newBaze);
+      this.setState({
+        data: data2,
+      });
+    };
+    const onFilter = (e) => {
+      if (e.target.value === "name") {
         this.setState({
-          newName: "",
-          newStatus: "",
+          data: this.state.data.sort(function (a, b) {
+            if (a.name < b.name) {
+              return -1;
+            }
+            if (a.name < b.name) {
+              return 1;
+            }
+            return 0;
+          }),
         });
       } else {
-        prompt("Are you full these inputs?");
+        this.setState({
+          data: this.state.data.sort(function (a, b) {
+            if (a.status < b.status) {
+              return -1;
+            }
+            if (a.status < b.status) {
+              return 1;
+            }
+            return 0;
+          }),
+        });
       }
     };
     return (
       <div>
         <table
           border="1"
-          style={{
-            borderCollapse: "collapse",
-            width: "70%",
-            margin: " auto",
-            marginTop: "100px",
-          }}
+          style={{ borderCollapse: "collapse", width: "70%", margin: "auto" }}
         >
           <thead>
             <tr>
               <th>
                 <input
-                  style={{ width: "95%" }}
-                  name="newName"
                   onChange={onChange}
+                  name="newName"
                   value={this.state.newName}
                 />
               </th>
               <th>
                 <input
-                  style={{ width: "95%" }}
-                  name="newStatus"
                   onChange={onChange}
+                  name="newStatus"
                   value={this.state.newStatus}
                 />
               </th>
-              <th>New Status</th>
               <th>
                 <button onClick={onAdd}>Add</button>
-                <button
-                  onClick={() => this.setState({ data: this.state.newData })}
-                >
-                  Restore
-                </button>
+                <button onClick={onRestore}>Restore</button>
+                <select id="filterStatus" onChange={onFilter}>
+                  <option value="name">Name</option>
+                  <option value="status">Status</option>
+                </select>
               </th>
             </tr>
           </thead>
         </table>
         <table
           border="1"
-          style={{
-            borderCollapse: "collapse",
-            width: "70%",
-            margin: "auto",
-          }}
+          style={{ borderCollapse: "collapse", width: "70%", margin: "auto" }}
         >
           <thead>
             <tr>
               <th>ID</th>
-              <th>NAME</th>
-              <th>STATUS</th>
-              <th>ACTION {this.state.data.length}</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Action {this.state.data.length}</th>
             </tr>
           </thead>
           <tbody>
-            {this.state.data.map((value) => {
-              return (
-                <tr>
-                  <td>{value.id}</td>
-                  <td>
-                    {this.state.selected === value.id ? (
-                      <input
-                        name="name"
-                        onChange={onChange}
-                        value={this.state.name}
-                      />
-                    ) : (
-                      value.name
-                    )}
-                  </td>
-                  <td>
-                    {this.state.selected === value.id ? (
-                      <input
-                        name="status"
-                        onChange={onChange}
-                        value={this.state.status}
-                      />
-                    ) : (
-                      value.status
-                    )}
-                  </td>
-                  <td>
-                    {this.state.selected === value.id ? (
-                      <button onClick={onSave}>Save</button>
-                    ) : (
-                      <button onClick={() => onEdit(value)}>Edit</button>
-                    )}
-                    <button onClick={() => onDelete(value)}>Delete</button>
-                  </td>
-                </tr>
-              );
-            })}
+            {this.state.data.map((value) => (
+              <tr key={value.id}>
+                <td>{value.id}</td>
+                <td>
+                  {this.state.selected === value.id ? (
+                    <input
+                      name="name"
+                      onChange={onChange}
+                      value={this.state.name}
+                    />
+                  ) : (
+                    value.name
+                  )}
+                </td>
+                <td>
+                  {this.state.selected === value.id ? (
+                    <input
+                      name="status"
+                      onChange={onChange}
+                      value={this.state.status}
+                    />
+                  ) : (
+                    value.status
+                  )}
+                </td>
+                <td>
+                  {this.state.selected === value.id ? (
+                    <button onClick={onSave}>Save</button>
+                  ) : (
+                    <button onClick={() => onEdit(value)}>Edit</button>
+                  )}
+                  <button onClick={() => onDelete(value)}>Delete</button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-        {console.log(this.state.data)}
       </div>
     );
   }
